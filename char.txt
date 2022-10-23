@@ -1,0 +1,38 @@
+url = 'https://www.charleskeith.com/lk/sale'
+
+excel = openpyxl.Workbook()
+sheet = excel.active
+sheet.title = 'Products'
+
+sheet.append(['Product No' , 'Product Name' , 'Old Price' , 'New Price' , 'Discount'])
+
+try:
+
+  source = requests.get(url)
+  #print(source)
+  soup = BeautifulSoup(source.content , 'lxml')
+  #print(soup)
+
+  products = soup.find_all('div' , class_ = 'product-tile ')
+  #print(products)
+
+  for product in products:
+    product_name = product.find('div' , class_ = 'pdp-link product_tile-name').a.text.strip()
+    #print(product_name)
+
+    product_oldprice = product.find('span' , class_='strike-through list').text
+    #print(product_oldprice)
+
+    product_newprice = product.find('span' , class_ = 'sales sales-discount').text.strip()
+    #print(product_newprice)
+
+    product_discount = product.find('div' , class_ = 'discount_percentage tile_discount').text
+    #print(product_discount)
+
+    product_no = product.find('a' , class_ = 'link product_tile-link recommender_font')['href'].split('/')[-1].split(".")[0].split("_")[0]
+    print(product_no)
+    sheet.append([product_name , product_oldprice , product_newprice , product_no])
+except Exception as e: 
+  print(e)
+
+excel.save('Charles&Keith.xlsx')
